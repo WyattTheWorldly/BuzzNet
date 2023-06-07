@@ -1,8 +1,5 @@
 package com.group.BuzzNet.User;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-
 import jakarta.persistence.*;
 
 import lombok.Builder;
@@ -35,27 +32,27 @@ public class User {
     private long userId;
 
     @Column(name = "username",
-            length = 50,
+            length = 11,
             nullable = false)
     private String username;
 
     @Column(name = "password",
-            length = 50,
+            length = 21,
             nullable = false)
     private String password;
 
     @Column(name = "first_name",
-            length = 50,
+            length = 21,
             nullable = false)
     private String firstName;
 
     @Column(name = "last_name",
-            length = 50,
+            length = 21,
             nullable = false)
     private String lastName;
 
     @Column(name = "email",
-            length = 30,
+            length = 21,
             nullable = false)
     private String email;
 
@@ -83,7 +80,7 @@ public class User {
                     Contain at least one special character.""");
         }
 
-        return true;
+        return !PASSWORD_PATTERN.matcher(this.password).matches();
     }
 
     public boolean validBirthDate(){
@@ -91,6 +88,17 @@ public class User {
         if (this.birthDate.isAfter(limitDate)){
             throw new IllegalStateException("User must be above the age of 16");
         }
-        return true;
+        return this.birthDate.isBefore(limitDate);
     }
+
+    public boolean checkForNullValues(){
+
+        if (this.getFirstName() == null) return false;
+        if (this.getLastName() == null) return false;
+        if (this.getUsername() == null) return false;
+        if (this.getPassword() == null) return false;
+        if (this.getEmail() == null) return false;
+        return this.getBirthDate() != null;
+    }
+
 }

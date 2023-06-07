@@ -16,29 +16,33 @@ public class UserService {
 
     public void save(User user) {
 
-        //check for existing user with id
-        User existingUser = userRepository.findById(user.getUserId())
-                .orElse(null);
-        if (existingUser != null) {
-            throw new IllegalStateException("User with id: " + user.getUserId() + " already exists.");
+        //check firstName size
+        if (!checkStringSize(user.getFirstName(), 20)){
+            throw new IllegalStateException("First name is too large, expecting 20 characters");
         }
 
-        //sanitize email
-        user.setEmail(user.getEmail().toLowerCase());
-
-        //unique email check
-        existingUser = userRepository.findByEmail(user.getEmail())
-                .orElse(null);
-        if (existingUser != null) {
-            throw new IllegalStateException("User with email: " + user.getEmail() + " already exists.");
+        //check lastName size
+        if (!checkStringSize(user.getLastName(), 20)){
+            throw new IllegalStateException("Last name is too large, expecting 20 characters");
         }
 
-        //unique username check
-        existingUser = userRepository.findByUsername(user.getUsername())
-                .orElse(null);
-        if (existingUser != null) {
-            throw new IllegalStateException("User with username: " + user.getUsername() + " already exists.");
+        //check lastName size
+        if (!checkStringSize(user.getUsername(), 10)){
+            throw new IllegalStateException("Username is too large, expecting 10 characters");
         }
+
+        //check email size
+        if (!checkStringSize(user.getEmail(), 20)){
+            throw new IllegalStateException("Email is too large, expecting 20 characters");
+        }
+
+        //check password size
+        if (!checkStringSize(user.getPassword(), 20)){
+            throw new IllegalStateException("Password is too large, expecting 20 characters");
+        }
+
+        //check for null values
+        user.checkForNullValues();
 
         //valid email check
         user.validEmail();
@@ -48,6 +52,26 @@ public class UserService {
 
         //valid birthdate check
         user.validBirthDate();
+
+
+        //check for existing user with id
+        //avoids an update on a user
+        if (userRepository.findById(user.getUserId()).isPresent()){
+            throw new IllegalStateException("User with id: " + user.getUserId() + " already exists.");
+        }
+
+        //sanitize email
+        user.setEmail(user.getEmail().toLowerCase());
+
+        //unique email check
+        if (userRepository.findByEmail(user.getEmail()).isPresent()){
+            throw new IllegalStateException("User with email: " + user.getEmail() + " already exists.");
+        }
+
+        //unique username check
+        if(userRepository.findByUsername(user.getUsername()).isPresent()){
+            throw new IllegalStateException("User with username: " + user.getUsername() + " already exists.");
+        }
 
         userRepository.save(user);
     }
@@ -89,6 +113,7 @@ public class UserService {
         userRepository.deleteAll();
     }
 
+    //TODO test the update method for User service.
     @Transactional
     public void update(long userId, String firstName, String lastName, String username, String email, String password, LocalDate birthDate) {
 
@@ -145,6 +170,10 @@ public class UserService {
                 user.getEmail(),
                 user.getUsername(),
                 user.getBirthDate());
+    }
+
+    private boolean checkStringSize(String inputString, int expectedSize){
+        return inputString.length()<= expectedSize;
     }
 
 }

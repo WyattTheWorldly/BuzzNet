@@ -19,11 +19,11 @@ class UserServiceTest {
     void save(){
         User user = User.builder()
                 .firstName("Test")
-                .lastName("User2")
+                .lastName("User")
                 .password("$trongPassword34")
                 .email("fake@gmail.com")
-                .birthDate(LocalDate.of(2001, 5, 25))
-                .username("testUser2")
+                .birthDate(LocalDate.of(2000, 5, 25))
+                .username("username1")
                 .build();
 
         userService.save(user);
@@ -37,7 +37,7 @@ class UserServiceTest {
 
     @Test
     void findByUserId() {
-        long userId = 1;
+        long userId = 10;
         UserDto user = userService.findById(userId);
         assertNotNull(user);
         System.out.println(user.toString());
@@ -45,7 +45,7 @@ class UserServiceTest {
 
     @Test
     void findByUsername() {
-        String username = "testUser";
+        String username = "username";
         UserDto user = userService.findByUsername(username);
         assertNotNull(user);
         System.out.println(user.toString());
