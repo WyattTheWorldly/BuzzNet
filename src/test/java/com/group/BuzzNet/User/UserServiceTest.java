@@ -23,7 +23,7 @@ class UserServiceTest {
 
     @Test
     void save(){
-        User user = User.builder()
+        UserModel user = UserModel.builder()
                 .firstName("Test")
                 .lastName("User")
                 .password("$trongPassword34")
@@ -43,10 +43,10 @@ class UserServiceTest {
 
     @Test
     void saveMany(){
-        List<User> users = new ArrayList<>();
+        List<UserModel> users = new ArrayList<>();
 
         for (int i = 0; i < 10; i ++){
-            users.add(User.builder()
+            users.add(UserModel.builder()
                     .firstName("Test")
                     .lastName("User")
                     .password("$trongPassword34")
@@ -91,14 +91,14 @@ class UserServiceTest {
     @Test
     void update() {
         long userId = 1;
-        String firstName = "Wyatt";
-        String lastName = "Stohr";
-        String username = "QuietWyatt";
-        String email = "realemail@gmail.com";
-        String password = "$trongPassword43";
-        LocalDate birthDate = LocalDate.of(2000, 5, 25);
+        String firstName = "Ethan";
+        String lastName = "Clyde";
+        String username = "AllClydeAside";
+        String email = "legit@gmail.com";
+        String password = "!Password78";
+        LocalDate birthDate = LocalDate.of(2002, 5, 25);
 
-        userService.update(userId, firstName, lastName, username, email, password, birthDate);
+        userService.update(userId, null, null, null, null, null, null);
     }
 
 }

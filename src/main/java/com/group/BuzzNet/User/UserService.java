@@ -14,32 +14,32 @@ public class UserService {
     @Autowired
     UserRepository userRepository;
 
-    public void save(User user) {
+    public void save(UserModel user) {
 
         //check firstName size
 
         if (user.getFirstName().length() > UserConstants.NAME_LENGTH){
-            throw new IllegalStateException("First name is too large, expecting 20 characters");
+            throw new IllegalStateException("First name is too large, expecting "+UserConstants.NAME_LENGTH+"characters or less.");
         }
 
         //check lastName size
         if (user.getLastName().length() > UserConstants.NAME_LENGTH){
-            throw new IllegalStateException("Last name is too large, expecting 20 characters");
+            throw new IllegalStateException("Last name is too large, expecting "+UserConstants.NAME_LENGTH+" characters or less.");
         }
 
         //check username size
         if (user.getUsername().length() > UserConstants.USERNAME_LENGTH){
-            throw new IllegalStateException("Username is too large, expecting 10 characters");
+            throw new IllegalStateException("Username is too large, expecting "+UserConstants.USERNAME_LENGTH+" characters or less");
         }
 
         //check email size
         if (user.getEmail().length() > UserConstants.EMAIL_LENGTH){
-            throw new IllegalStateException("Email is too large, expecting 20 characters");
+            throw new IllegalStateException("Email is too large, expecting "+UserConstants.EMAIL_LENGTH+" characters or less.");
         }
 
         //check password size
         if (user.getPassword().length() > UserConstants.PASSWORD_LENGTH){
-            throw new IllegalStateException("Password is too large, expecting 20 characters");
+            throw new IllegalStateException("Password is too large, expecting "+UserConstants.PASSWORD_LENGTH+" characters or less.");
         }
 
         //check for null values
@@ -57,8 +57,8 @@ public class UserService {
 
         //check for existing user with id
         //avoids an update on a user
-        if (userRepository.findById(user.getUserId()).isPresent()){
-            throw new IllegalStateException("User with id: " + user.getUserId() + " already exists.");
+        if (userRepository.findById(user.getId()).isPresent()){
+            throw new IllegalStateException("User with id: " + user.getId() + " already exists.");
         }
 
         //sanitize email
@@ -77,7 +77,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void save(List<User> users) {
+    public void save(List<UserModel> users) {
         users.forEach(this::save);
     }
 
@@ -118,7 +118,7 @@ public class UserService {
     public void update(long userId, String firstName, String lastName, String username, String email, String password, LocalDate birthDate) {
 
         //check that user exists
-        User user = userRepository.findById(userId)
+        UserModel user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalStateException("No users found with id: " + userId));
 
         //update firstname logic
@@ -176,10 +176,12 @@ public class UserService {
 
         //update email logic
         if (email != null){
-            if (email.length() == 0){
-                throw new IllegalStateException("Email must be at least one character long.");
+            //email pattern check
+            if (!UserConstants.EMAIL_PATTERN.matcher(email).matches()){
+                throw new IllegalStateException("Incorrect email format.");
             }
 
+            email = email.toLowerCase();
             if (user.getEmail().equals(email)){
                 throw new IllegalStateException("Email provided for an update should be different than current email.");
             }
@@ -188,18 +190,24 @@ public class UserService {
                 throw new IllegalStateException("Email must be "+UserConstants.EMAIL_LENGTH+" characters or shorter.");
             }
 
-            //unique username check
+            //unique email check
             if(userRepository.findByEmail(email).isPresent()){
                 throw new IllegalStateException("User with email: " + email + " already exists.");
             }
-            //TODO implement the email pattern so it can be used here
-            user.setEmail(email.toLowerCase());
+            user.setEmail(email);
         }
 
         //update password logic
         if (password != null){
-            if (password.length() == 0){
-                throw new IllegalStateException("Password must be at least one character long.");
+            if (!UserConstants.PASSWORD_PATTERN.matcher(password).matches()){
+                throw new IllegalStateException("""
+                    
+                    Password must be:
+                    At least 8 characters long.
+                    Contain at least one uppercase letter.
+                    Contain at least one lower case letter.
+                    Contain at least one digit.
+                    Contain at least one special character.""");
             }
 
             if (user.getPassword().equals(password)){
@@ -209,7 +217,6 @@ public class UserService {
             if (password.length() > UserConstants.PASSWORD_LENGTH){
                 throw new IllegalStateException("Password must be "+UserConstants.PASSWORD_LENGTH+" characters or shorter.");
             }
-            //TODO implement the password pattern so it can be used here
             user.setPassword(password);
         }
 
@@ -219,14 +226,17 @@ public class UserService {
                 throw new IllegalStateException("Birthdate provided for an update should be different than current birthdate");
             }
 
-            //TODO implement the birthdate pattern so it can be used here
+            LocalDate limitDate = LocalDate.now().minusYears(16);
+            if (birthDate.isAfter(limitDate)){
+                throw new IllegalStateException("User must be above the age of 16.");
+            }
             user.setBirthDate(birthDate);
         }
 
     }
 
-    private UserDto adapter(User user) {
-        return new UserDto(user.getUserId(),
+    private UserDto adapter(UserModel user) {
+        return new UserDto(user.getId(),
                 user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),

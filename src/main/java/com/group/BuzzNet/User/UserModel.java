@@ -1,5 +1,6 @@
 package com.group.BuzzNet.User;
 
+import com.group.BuzzNet.Post.PostModel;
 import jakarta.persistence.*;
 
 import lombok.Builder;
@@ -9,7 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.time.LocalDate;
-import java.util.regex.Pattern;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -24,12 +25,12 @@ import java.util.regex.Pattern;
                 @UniqueConstraint(name = "unique_username_constraint", columnNames = "username")
         }
 )
-public class User {
+public class UserModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private long userId;
+    private long id;
 
     @Column(name = "username",
             length = UserConstants.USERNAME_LENGTH,
@@ -60,18 +61,21 @@ public class User {
             nullable = false)
     private LocalDate birthDate;
 
+    //Relationship to PostModel.user
+    @OneToOne(targetEntity = PostModel.class, cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY)
+    private List<PostModel> posts;
+
     public boolean validEmail(){
-        final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
-        if (!EMAIL_PATTERN.matcher(this.email).matches()){
+        if (!UserConstants.EMAIL_PATTERN.matcher(this.email).matches()){
             throw new IllegalStateException("Incorrect email format.");
         }
-        return true;
+        return !UserConstants.EMAIL_PATTERN.matcher(this.email).matches();
     }
 
     public boolean validPassword(){
-        final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$");
-        if (!PASSWORD_PATTERN.matcher(this.password).matches()){
+        if (!UserConstants.PASSWORD_PATTERN.matcher(this.password).matches()){
             throw new IllegalStateException("""
+                    
                     Password must be:
                     At least 8 characters long.
                     Contain at least one uppercase letter.
@@ -80,25 +84,22 @@ public class User {
                     Contain at least one special character.""");
         }
 
-        return !PASSWORD_PATTERN.matcher(this.password).matches();
+        return !UserConstants.PASSWORD_PATTERN.matcher(this.password).matches();
     }
 
     public boolean validBirthDate(){
         LocalDate limitDate = LocalDate.now().minusYears(16);
         if (this.birthDate.isAfter(limitDate)){
-            throw new IllegalStateException("User must be above the age of 16");
+            throw new IllegalStateException("User must be above the age of 16.");
         }
         return this.birthDate.isBefore(limitDate);
     }
 
     public boolean checkForNullValues(){
 
-        if (this.getFirstName() == null) return false;
-        if (this.getLastName() == null) return false;
-        if (this.getUsername() == null) return false;
-        if (this.getPassword() == null) return false;
-        if (this.getEmail() == null) return false;
-        return this.getBirthDate() != null;
+        return (this.getBirthDate() != null) && (this.getEmail() != null) &&
+                (this.getPassword() != null) && (this.getUsername() != null) &&
+                (this.getLastName() != null) && (this.getFirstName() != null);
     }
 
 }

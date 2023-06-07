@@ -16,12 +16,12 @@ public class UserController {
 
     //TODO implement and test the Controller
     @PostMapping("/save")
-    public void save(@RequestBody User user){
+    public void save(@RequestBody UserModel user){
         userService.save(user);
     }
 
     @PostMapping("/saveAll")
-    public void saveAll(@RequestBody List<User> users){
+    public void saveAll(@RequestBody List<UserModel> users){
         userService.save(users);
     }
 
