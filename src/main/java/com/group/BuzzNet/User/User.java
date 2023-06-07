@@ -32,27 +32,27 @@ public class User {
     private long userId;
 
     @Column(name = "username",
-            length = 11,
+            length = UserConstants.USERNAME_LENGTH,
             nullable = false)
     private String username;
 
     @Column(name = "password",
-            length = 21,
+            length = UserConstants.PASSWORD_LENGTH,
             nullable = false)
     private String password;
 
     @Column(name = "first_name",
-            length = 21,
+            length = UserConstants.NAME_LENGTH,
             nullable = false)
     private String firstName;
 
     @Column(name = "last_name",
-            length = 21,
+            length = UserConstants.NAME_LENGTH,
             nullable = false)
     private String lastName;
 
     @Column(name = "email",
-            length = 21,
+            length = UserConstants.EMAIL_LENGTH,
             nullable = false)
     private String email;
 

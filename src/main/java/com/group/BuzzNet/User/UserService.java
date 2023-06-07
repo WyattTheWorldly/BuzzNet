@@ -17,27 +17,28 @@ public class UserService {
     public void save(User user) {
 
         //check firstName size
-        if (!checkStringSize(user.getFirstName(), 20)){
+
+        if (user.getFirstName().length() > UserConstants.NAME_LENGTH){
             throw new IllegalStateException("First name is too large, expecting 20 characters");
         }
 
         //check lastName size
-        if (!checkStringSize(user.getLastName(), 20)){
+        if (user.getLastName().length() > UserConstants.NAME_LENGTH){
             throw new IllegalStateException("Last name is too large, expecting 20 characters");
         }
 
-        //check lastName size
-        if (!checkStringSize(user.getUsername(), 10)){
+        //check username size
+        if (user.getUsername().length() > UserConstants.USERNAME_LENGTH){
             throw new IllegalStateException("Username is too large, expecting 10 characters");
         }
 
         //check email size
-        if (!checkStringSize(user.getEmail(), 20)){
+        if (user.getEmail().length() > UserConstants.EMAIL_LENGTH){
             throw new IllegalStateException("Email is too large, expecting 20 characters");
         }
 
         //check password size
-        if (!checkStringSize(user.getPassword(), 20)){
+        if (user.getPassword().length() > UserConstants.PASSWORD_LENGTH){
             throw new IllegalStateException("Password is too large, expecting 20 characters");
         }
 
@@ -113,51 +114,112 @@ public class UserService {
         userRepository.deleteAll();
     }
 
-    //TODO test the update method for User service.
     @Transactional
     public void update(long userId, String firstName, String lastName, String username, String email, String password, LocalDate birthDate) {
 
-        //check user exists
+        //check that user exists
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalStateException("No users found with id: " + userId));
 
-        //update firstname check
-        if (firstName != null && firstName.length() > 0 && !user.getFirstName().equals(firstName)) {
+        //update firstname logic
+        if (firstName != null){
+            if (firstName.length() == 0){
+                throw new IllegalStateException("First name must be at least one character long.");
+            }
+
+            if (user.getFirstName().equals(firstName)){
+                throw new IllegalStateException("The name provided for an update should be different than current name.");
+            }
+
+            if (firstName.length() > UserConstants.NAME_LENGTH){
+                throw new IllegalStateException("First name must be "+UserConstants.NAME_LENGTH+" characters or shorter.");
+            }
             user.setFirstName(firstName);
         }
 
-        //update lastname check
-        if (lastName != null && lastName.length() > 0 && !user.getLastName().equals(lastName)) {
+        //update lastname logic
+        if (lastName != null){
+            if (lastName.length() == 0){
+                throw new IllegalStateException("Last name must be at least one character long.");
+            }
+
+            if (user.getLastName().equals(lastName)){
+                throw new IllegalStateException("The name provided for an update should be different than current name.");
+            }
+
+            if (lastName.length() > UserConstants.NAME_LENGTH){
+                throw new IllegalStateException("Last name must be "+UserConstants.NAME_LENGTH+" characters or shorter.");
+            }
             user.setLastName(lastName);
         }
 
-        //update username check
-        if (username != null && username.length() > 0 && !user.getUsername().equals(username)) {
-            User takenUsername = userRepository.findByUsername(username)
-                    .orElse(null);
-            if (takenUsername != null) {
-                throw new IllegalStateException(username + " is already in use");
+        //update username logic
+        if (username != null){
+            if (username.length() == 0){
+                throw new IllegalStateException("Username must be at least one character long.");
+            }
+
+            if (user.getUsername().equals(username)){
+                throw new IllegalStateException("Username provided for an update should be different than current username.");
+            }
+
+            if (username.length() > UserConstants.USERNAME_LENGTH){
+                throw new IllegalStateException("Username must be "+UserConstants.USERNAME_LENGTH+" characters or shorter.");
+            }
+
+            //unique username check
+            if(userRepository.findByUsername(username).isPresent()){
+                throw new IllegalStateException("User with username: " + username + " already exists.");
             }
             user.setUsername(username);
         }
 
-        //update email check
-        if (email != null && email.length() > 0 && !user.getEmail().equals(email) && user.validEmail()) {
-            User takenEmail = userRepository.findByEmail(email)
-                    .orElse(null);
-            if (takenEmail != null) {
-                throw new IllegalStateException(email + " is already in use");
+        //update email logic
+        if (email != null){
+            if (email.length() == 0){
+                throw new IllegalStateException("Email must be at least one character long.");
             }
-            user.setEmail(email);
+
+            if (user.getEmail().equals(email)){
+                throw new IllegalStateException("Email provided for an update should be different than current email.");
+            }
+
+            if (email.length() > UserConstants.EMAIL_LENGTH){
+                throw new IllegalStateException("Email must be "+UserConstants.EMAIL_LENGTH+" characters or shorter.");
+            }
+
+            //unique username check
+            if(userRepository.findByEmail(email).isPresent()){
+                throw new IllegalStateException("User with email: " + email + " already exists.");
+            }
+            //TODO implement the email pattern so it can be used here
+            user.setEmail(email.toLowerCase());
         }
 
-        //update password check
-        if (password != null && password.length() > 0 && !user.getPassword().equals(password) && user.validPassword()) {
+        //update password logic
+        if (password != null){
+            if (password.length() == 0){
+                throw new IllegalStateException("Password must be at least one character long.");
+            }
+
+            if (user.getPassword().equals(password)){
+                throw new IllegalStateException("Password provided for an update should be different than current password.");
+            }
+
+            if (password.length() > UserConstants.PASSWORD_LENGTH){
+                throw new IllegalStateException("Password must be "+UserConstants.PASSWORD_LENGTH+" characters or shorter.");
+            }
+            //TODO implement the password pattern so it can be used here
             user.setPassword(password);
         }
 
         //update birthdate check
-        if (birthDate != null && !user.getBirthDate().equals(birthDate) && user.validBirthDate() && !user.getBirthDate().isEqual(birthDate)) {
+        if (birthDate != null){
+            if (user.getBirthDate().equals(birthDate)){
+                throw new IllegalStateException("Birthdate provided for an update should be different than current birthdate");
+            }
+
+            //TODO implement the birthdate pattern so it can be used here
             user.setBirthDate(birthDate);
         }
 
@@ -170,10 +232,6 @@ public class UserService {
                 user.getEmail(),
                 user.getUsername(),
                 user.getBirthDate());
-    }
-
-    private boolean checkStringSize(String inputString, int expectedSize){
-        return inputString.length()<= expectedSize;
     }
 
 }
