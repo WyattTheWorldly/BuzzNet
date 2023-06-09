@@ -17,12 +17,12 @@ class UserServiceTest {
     UserService userService;
 
     @Test
-    void deleteAll() {
+    public void deleteAll() {
         userService.deleteAll();
     }
 
     @Test
-    void save(){
+    public void save(){
         UserModel user = UserModel.builder()
                 .firstName("Test")
                 .lastName("User")
@@ -36,13 +36,13 @@ class UserServiceTest {
     }
 
     @Test
-    void delete() {
+    public void delete() {
         long userId = 2;
         userService.delete(userId);
     }
 
     @Test
-    void saveMany(){
+    public void saveMany(){
         List<UserModel> users = new ArrayList<>();
 
         for (int i = 0; i < 10; i ++){
@@ -59,13 +59,14 @@ class UserServiceTest {
     }
 
     @Test
-    void findAll() {
+    public void findAll() {
         List<UserDto> users = userService.findAll();
         users.forEach(System.out::println);
+
     }
 
     @Test
-    void findByUserId() {
+    public void findByUserId() {
         long userId = 1;
         UserDto user = userService.findById(userId);
         assertNotNull(user);
@@ -73,7 +74,7 @@ class UserServiceTest {
     }
 
     @Test
-    void findByUsername() {
+    public void findByUsername() {
         String username = "username1";
         UserDto user = userService.findByUsername(username);
         assertNotNull(user);
@@ -81,7 +82,7 @@ class UserServiceTest {
     }
 
     @Test
-    void findByEmail() {
+    public void findByEmail() {
         String email = "legitemail1@gmail.com";
         UserDto user = userService.findByEmail(email);
         assertNotNull(user);
@@ -89,7 +90,21 @@ class UserServiceTest {
     }
 
     @Test
-    void update() {
+    public void findByPartialName(){
+        String partialName = "test";
+        List<UserDto> users = userService.findByPartialName(partialName);
+        users.forEach(System.out::println);
+    }
+
+    @Test
+    public void findByPartialUsername(){
+        String username = "wyatt";
+        List<UserDto> users = userService.findByPartialUsername(username);
+        users.forEach(System.out::println);
+    }
+
+    @Test
+    public void update() {
         long userId = 1;
         String firstName = "Ethan";
         String lastName = "Clyde";

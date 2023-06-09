@@ -16,7 +16,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@ToString
+@ToString(exclude = {
+        "posts"
+})
 
 @Entity(name = "User")
 @Table(name = "user",
@@ -62,7 +64,7 @@ public class UserModel {
     private LocalDate birthDate;
 
     //Relationship to PostModel.user
-    @OneToOne(targetEntity = PostModel.class, cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToMany(targetEntity = PostModel.class, cascade = CascadeType.ALL, mappedBy = "user", fetch = FetchType.LAZY)
     private List<PostModel> posts;
 
     public boolean validEmail(){
@@ -74,14 +76,8 @@ public class UserModel {
 
     public boolean validPassword(){
         if (!UserConstants.PASSWORD_PATTERN.matcher(this.password).matches()){
-            throw new IllegalStateException("""
-                    
-                    Password must be:
-                    At least 8 characters long.
-                    Contain at least one uppercase letter.
-                    Contain at least one lower case letter.
-                    Contain at least one digit.
-                    Contain at least one special character.""");
+            throw new IllegalStateException("Password must be at least 8 characters long, contain at least one uppercase letter, " +
+                    "contain at least one lower case letter, contain at least one digit, contain at least one special character.");
         }
 
         return !UserConstants.PASSWORD_PATTERN.matcher(this.password).matches();
@@ -95,7 +91,7 @@ public class UserModel {
         return this.birthDate.isBefore(limitDate);
     }
 
-    public boolean checkForNullValues(){
+    public boolean noNullFields(){
 
         return (this.getBirthDate() != null) && (this.getEmail() != null) &&
                 (this.getPassword() != null) && (this.getUsername() != null) &&

@@ -3,11 +3,7 @@ package com.group.BuzzNet.Post;
 import com.group.BuzzNet.User.UserModel;
 import jakarta.persistence.*;
 
-import lombok.Builder;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDate;
 

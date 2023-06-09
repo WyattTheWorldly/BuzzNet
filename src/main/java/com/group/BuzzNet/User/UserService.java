@@ -16,10 +16,14 @@ public class UserService {
 
     public void save(UserModel user) {
 
-        //check firstName size
+        //check for null values
+        if (!user.noNullFields()){
+            throw new IllegalStateException("One or more fields were left as null. Save aborted");
+        }
 
+        //check firstName size
         if (user.getFirstName().length() > UserConstants.NAME_LENGTH){
-            throw new IllegalStateException("First name is too large, expecting "+UserConstants.NAME_LENGTH+"characters or less.");
+            throw new IllegalStateException("First name is too large, expecting "+UserConstants.NAME_LENGTH+" characters or less.");
         }
 
         //check lastName size
@@ -41,9 +45,6 @@ public class UserService {
         if (user.getPassword().length() > UserConstants.PASSWORD_LENGTH){
             throw new IllegalStateException("Password is too large, expecting "+UserConstants.PASSWORD_LENGTH+" characters or less.");
         }
-
-        //check for null values
-        user.checkForNullValues();
 
         //valid email check
         user.validEmail();
@@ -92,6 +93,20 @@ public class UserService {
         return userRepository.findById(userId)
                 .map(this::adapter)
                 .orElseThrow(() -> new IllegalStateException("No users found with id: " + userId));
+    }
+
+    public List<UserDto> findByPartialName(String partialName){
+        return userRepository.findByPartialName(partialName)
+                .stream()
+                .map(this::adapter)
+                .collect(Collectors.toList());
+    }
+
+    public List<UserDto> findByPartialUsername(String username){
+        return userRepository.findByPartialUserame(username)
+                .stream()
+                .map(this::adapter)
+                .collect(Collectors.toList());
     }
 
     public UserDto findByUsername(String username) {
